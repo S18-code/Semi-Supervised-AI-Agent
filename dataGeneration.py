@@ -1,11 +1,6 @@
 """
-ATSC 3.0 Update Broadcast Agent — Data Generation (Steps 1-4), v2
+ATSC 3.0 Update Broadcast Agent — Data Generation 
 ================================================================
-Same 4 steps as before, but instead of one bundled "profile" output, each
-of the 6 transmission parameters is chosen INDEPENDENTLY, using its own
-threshold function. Each output column can now be modeled/predicted
-separately later (multi-output classification).
-
 Outputs (per update):
   1. plp                   -- which Physical Layer Pipe
   2. modulation             -- QPSK / 16QAM / 64QAM / 256QAM / 1024QAM / 4096QAM
@@ -13,13 +8,6 @@ Outputs (per update):
   4. ldpc_length             -- NORMAL_16200 / LONG_64800
   5. al_fec_redundancy_pct   -- application-layer FEC repair overhead
   6. carousel_repeat_sec     -- how often the file object re-broadcasts
-
-NOTE: because these are chosen independently, it's possible to generate
-combinations that don't make practical sense (e.g. robust modulation +
-zero AL-FEC). The safety-floor guardrails below only protect the
-critical-update MINIMUMS per variable -- they don't prevent every
-possible weird combination on the non-critical side. Worth reviewing
-the labeled output for sanity as you tune thresholds.
 """
 
 import os
@@ -47,8 +35,7 @@ PLP_OPTIONS = ["PLP_CRITICAL", "PLP_STANDARD", "PLP_BULK"]
 # Ordered most -> least robust
 MODULATION_OPTIONS = ["QPSK", "16QAM", "64QAM", "256QAM", "1024QAM", "4096QAM"]
 
-# Ordered most -> least robust (subset of the 12 standard LDPC rates,
-# expressed as k/15 per ATSC A/322 style notation)
+# Ordered most -> least robust 
 CODE_RATE_OPTIONS = ["2/15", "5/15", "7/15", "9/15", "11/15", "13/15"]
 
 LDPC_LENGTH_OPTIONS = ["LONG_64800", "NORMAL_16200"]  # long = more robust
@@ -57,9 +44,7 @@ LDPC_LENGTH_OPTIONS = ["LONG_64800", "NORMAL_16200"]  # long = more robust
 # ---------------------------------------------------------------------------
 # STEP 3: INDEPENDENT THRESHOLD FUNCTIONS -- ONE PER PARAMETER
 # ---------------------------------------------------------------------------
-# Edit the thresholds inside each function to match your actual robustness
-# requirements. Each function only looks at (update_type, priority, size_mb)
-# and decides ITS OWN parameter -- they don't reference each other.
+
 
 def choose_plp(update_type: str, priority: int, size_mb: float) -> str:
     if update_type == "critical":
@@ -174,7 +159,7 @@ def label_update(update_type: str, priority: int, size_mb: float) -> dict:
 
 
 # ---------------------------------------------------------------------------
-# STEP 4: SYNTHETIC DATA GENERATION -- unchanged in approach
+# STEP 4: SYNTHETIC DATA GENERATION
 # ---------------------------------------------------------------------------
 
 def sample_update(rng: np.random.Generator) -> dict:
